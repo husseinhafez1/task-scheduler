@@ -4,11 +4,12 @@ import (
 	"log"
 	"net"
 
-	"github.com/husseinhafez1/task-scheduler/internal/server"
-	pb "github.com/husseinhafez1/task-scheduler/proto"
+	"task/internal/server"
+	pb "task/proto"
 
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterTaskServiceServer(grpcServer, server.NewServer(rdb))
-
+	reflection.Register(grpcServer)
 	log.Println("gRPC server running on port 50051")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

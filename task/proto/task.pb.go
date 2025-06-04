@@ -222,7 +222,7 @@ const file_proto_task_proto_rawDesc = "" +
 	"\x06status\x18\x01 \x01(\tR\x06status2\x80\x01\n" +
 	"\vTaskService\x120\n" +
 	"\tSubmitJob\x12\x10.task.JobRequest\x1a\x11.task.JobResponse\x12?\n" +
-	"\fGetJobStatus\x12\x16.task.JobStatusRequest\x1a\x17.task.JobStatusResponseB4Z2github.com/husseinhafez1/task-scheduler/proto;taskb\x06proto3"
+	"\fGetJobStatus\x12\x16.task.JobStatusRequest\x1a\x17.task.JobStatusResponseB\x11Z\x0ftask/proto;taskb\x06proto3"
 
 var (
 	file_proto_task_proto_rawDescOnce sync.Once

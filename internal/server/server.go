@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	pb "github.com/husseinhafez1/task-scheduler/proto"
+	pb "task/proto"
 
 	"github.com/go-redis/redis/v8"
 )

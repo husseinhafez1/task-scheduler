@@ -25,12 +25,12 @@ func StartWorker(rdb *redis.Client) {
 
 		for _, stream := range entries {
 			for _, message := range stream.Messages {
-				jobID := message.Fields["job_id"].(string)
-				payload := message.Fields["payload"].(string)
-				retryCount, _ := strconv.Atoi(message.Fields["retry"].(string))
+				jobID := message.Values["job_id"].(string)
+				payload := message.Values["payload"].(string)
+				retryCount, _ := strconv.Atoi(message.Values["retry"].(string))
 
 				log.Printf("Processing job %s: %s", jobID, payload, retryCount)
-				success := processJob(jobID, payload)
+				success := processJob(payload)
 
 				if !success && retryCount < 3 {
 					backoff := time.Duration(math.Pow(2, float64(retryCount))) * time.Second
