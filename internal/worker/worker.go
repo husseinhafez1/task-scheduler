@@ -12,10 +12,14 @@ import (
 
 func StartWorker(rdb *redis.Client) {
 	ctx := context.Background()
+	_ = rdb.XGroupCreateMkStream(ctx, "jobs", "workers", "$")
 	for {
-		entries, err := rdb.XRead(ctx, &redis.XReadArgs{
-			Streams: []string{"jobs", "0"},
-			Block:   0,
+		entries, err := rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
+			Group:    "workers",
+			Consumer: "worker-1",
+			Streams:  []string{"jobs", ">"},
+			Block:    0,
+			Count:    1,
 		}).Result()
 
 		if err != nil {
@@ -29,7 +33,7 @@ func StartWorker(rdb *redis.Client) {
 				payload := message.Values["payload"].(string)
 				retryCount, _ := strconv.Atoi(message.Values["retry"].(string))
 
-				log.Printf("Processing job %s: %s", jobID, payload, retryCount)
+				log.Printf("Processing job %s: %s (retry %d)", jobID, payload, retryCount)
 				success := processJob(payload)
 
 				if !success && retryCount < 3 {
@@ -45,6 +49,14 @@ func StartWorker(rdb *redis.Client) {
 						},
 					})
 				}
+				if success {
+					rdb.XAck(ctx, "jobs", "workers", message.ID)
+				}
+				rdb.HSet(ctx, "job:"+jobID, map[string]interface{}{
+					"status":     "success", // or "failed"
+					"retry":      retryCount,
+					"updated_at": time.Now().Format(time.RFC3339),
+				})
 			}
 		}
 	}
