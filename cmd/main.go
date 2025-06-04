@@ -13,19 +13,19 @@ import (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", ":50053")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: "redis:6379",
 	})
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterTaskServiceServer(grpcServer, server.NewServer(rdb))
 	reflection.Register(grpcServer)
-	log.Println("gRPC server running on port 50051")
+	log.Println("gRPC server running on port 50053")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
