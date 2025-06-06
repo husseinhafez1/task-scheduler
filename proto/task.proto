@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package task;
 
-option go_package = "task/proto;task";
+option go_package = "proto;task";
 
 service TaskService {
     rpc SubmitJob (JobRequest) returns (JobResponse);
