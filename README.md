@@ -39,6 +39,8 @@ Located in `/proto/task.proto`.
 - `GetJobStatus(JobStatusRequest) returns (JobStatusResponse)`
 - `GetJobLogs(JobStatusRequest) returns (JobLogsResponse)`
 
+[📄 View the Protobuf definitions →](./proto/task.proto)
+
 ---
 
 ## ⚙️ How It Works
@@ -47,6 +49,19 @@ Located in `/proto/task.proto`.
 3. **Worker**: A Go worker consumes jobs, processes them, handles retries, and updates job status and logs in Redis.
 4. **Job Status & Logs**: Clients can query job status (`GetJobStatus`) and fetch job logs (`GetJobLogs`).
 5. **Observability**: Prometheus scrapes `/metrics` for job counts, failures, and latency histograms.
+
+---
+
+## 📈 Metrics Overview
+Exposed at `/metrics`:
+- `jobs_processed_total` — count of all processed jobs
+- `jobs_failed_total` — count of failed jobs
+- `job_duration_seconds` — histogram of processing latency
+- `jobs_processed_by_type_total{type="email"}` — per-job-type counts
+- `jobs_failed_by_type_total{type="email"}` — per-job-type failures
+
+Bonus:
+![Prometheus UI Screenshot](./docs/prometheus-metrics.png)
 
 ---
 
@@ -131,3 +146,14 @@ docker-compose up --build
 - Prometheus metrics for processed/failed jobs and latency
 - Token-based authentication
 - One-command local stack with Docker Compose
+
+---
+
+## 🧪 Testing
+- Unit tests for core retry and processing logic (coming soon)
+- Recommended: use [`redis-mock`](https://github.com/go-redis/redismock) or [`testcontainers-go`](https://github.com/testcontainers/testcontainers-go) for integration tests
+- Even a small `worker_test.go` with a fake processor would impress
+
+---
+
+> This project was built to demonstrate distributed job queuing, retry logic, and observability using real-world tools. It's ideal as a foundation for task scheduling systems, async pipelines, or devtools infra.
