@@ -148,11 +148,4 @@ docker-compose up --build
 
 ---
 
-## 🧪 Testing
-- Unit tests for core retry and processing logic (coming soon)
-- Recommended: use [`redis-mock`](https://github.com/go-redis/redismock) or [`testcontainers-go`](https://github.com/testcontainers/testcontainers-go) for integration tests
-- Even a small `worker_test.go` with a fake processor would impress
-
----
-
 > This project was built to demonstrate distributed job queuing, retry logic, and observability using real-world tools. It's ideal as a foundation for task scheduling systems, async pipelines, or devtools infra.
