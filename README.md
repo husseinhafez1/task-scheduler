@@ -60,9 +60,6 @@ Exposed at `/metrics`:
 - `jobs_processed_by_type_total{type="email"}` — per-job-type counts
 - `jobs_failed_by_type_total{type="email"}` — per-job-type failures
 
-Bonus:
-![Prometheus UI Screenshot](./docs/prometheus-metrics.png)
-
 ---
 
 ## 🗺️ Architecture Diagram
