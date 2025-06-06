@@ -123,9 +123,6 @@ grpcurl -plaintext \
 ## 🐳 Quick Start (Docker Compose)
 ```sh
 docker-compose up --build
-```- App: gRPC on `localhost:50053`, metrics on `localhost:2113/metrics`
-- Redis: `localhost:6379`
-- Prometheus: `localhost:9090`
 ```
 ---
 
