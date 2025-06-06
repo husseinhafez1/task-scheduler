@@ -2,13 +2,25 @@ package worker
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"math"
 	"strconv"
 	"time"
 
+	"task/internal/metrics"
+	"task/internal/worker/processors"
+
 	"github.com/go-redis/redis/v8"
+	"github.com/prometheus/client_golang/prometheus"
 )
+
+// JobPayload represents the structure of a job payload
+type JobPayload struct {
+	Type    string          `json:"type"`
+	Data    json.RawMessage `json:"data"`
+	Timeout int             `json:"timeout"` // timeout in seconds
+}
 
 func StartWorker(rdb *redis.Client) {
 	ctx := context.Background()
@@ -34,36 +46,97 @@ func StartWorker(rdb *redis.Client) {
 				retryCount, _ := strconv.Atoi(message.Values["retry"].(string))
 
 				log.Printf("Processing job %s: %s (retry %d)", jobID, payload, retryCount)
-				success := processJob(payload)
 
-				if !success && retryCount < 3 {
-					backoff := time.Duration(math.Pow(2, float64(retryCount))) * time.Second
-					time.Sleep(backoff)
-
-					rdb.XAdd(ctx, &redis.XAddArgs{
-						Stream: "jobs",
-						Values: map[string]interface{}{
-							"job_id":  jobID,
-							"payload": payload,
-							"retry":   retryCount + 1,
-						},
-					})
+				// Start timing the job with label
+				jobType := "unknown"
+				var jobPayload JobPayload
+				if err := json.Unmarshal([]byte(payload), &jobPayload); err == nil {
+					jobType = jobPayload.Type
 				}
-				if success {
+				timer := prometheus.NewTimer(metrics.JobDurationByType.WithLabelValues(jobType))
+				success := processJob(payload)
+				timer.ObserveDuration()
+
+				if !success {
+					metrics.JobsFailedTotal.Inc()
+					metrics.JobsFailedByType.WithLabelValues(jobType).Inc()
+					if retryCount < 3 {
+						backoff := time.Duration(math.Pow(2, float64(retryCount))) * time.Second
+						time.Sleep(backoff)
+
+						rdb.XAdd(ctx, &redis.XAddArgs{
+							Stream: "jobs",
+							Values: map[string]interface{}{
+								"job_id":  jobID,
+								"payload": payload,
+								"retry":   retryCount + 1,
+							},
+						})
+					}
+				} else {
+					metrics.JobsProcessedTotal.Inc()
+					metrics.JobsProcessedByType.WithLabelValues(jobType).Inc()
 					rdb.XAck(ctx, "jobs", "workers", message.ID)
 				}
+
+				status := "success"
+				if !success {
+					status = "failed"
+				}
+
 				rdb.HSet(ctx, "job:"+jobID, map[string]interface{}{
-					"status":     "success", // or "failed"
+					"status":     status,
 					"retry":      retryCount,
 					"updated_at": time.Now().Format(time.RFC3339),
 				})
 			}
 		}
 	}
-
 }
 
 func processJob(payload string) bool {
-	log.Printf("Processing payload: %s", payload)
+	var jobPayload JobPayload
+	if err := json.Unmarshal([]byte(payload), &jobPayload); err != nil {
+		log.Printf("Error parsing job payload: %v", err)
+		return false
+	}
+
+	// Create a context with timeout if specified
+	ctx := context.Background()
+	if jobPayload.Timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Duration(jobPayload.Timeout)*time.Second)
+		defer cancel()
+	}
+
+	// Process different job types
+	switch jobPayload.Type {
+	case "email":
+		return processors.ProcessEmailJob(ctx, jobPayload.Data)
+	case "notification":
+		return processNotificationJob(ctx, jobPayload.Data)
+	case "cleanup":
+		return processCleanupJob(ctx, jobPayload.Data)
+	default:
+		log.Printf("Unknown job type: %s", jobPayload.Type)
+		return false
+	}
+}
+
+func processEmailJob(ctx context.Context, data json.RawMessage) bool {
+	// TODO: Implement email sending logic
+	log.Printf("Processing email job with data: %s", string(data))
+	return true
+}
+
+func processNotificationJob(ctx context.Context, data json.RawMessage) bool {
+	// TODO: Implement notification logic
+	log.Printf("Processing notification job with data: %s", string(data))
+	return true
+}
+
+func processCleanupJob(ctx context.Context, data json.RawMessage) bool {
+	// TODO: Implement cleanup logic
+	log.Printf("Processing cleanup job with data: %s", string(data))
 	return true
 }
