@@ -1,7 +1,7 @@
 # Task Scheduler (gRPC Job Queue)
 
 ## 🚀 Overview
-A production-grade, observable, and secure gRPC-based job queue system with Redis, Prometheus metrics, and Docker Compose orchestration.
+A production-style, observable gRPC-based job queue with basic token-based access control. Built for reliability, observability, and developer-friendliness.
 
 ---
 
@@ -11,6 +11,33 @@ A production-grade, observable, and secure gRPC-based job queue system with Redi
 - **Redis**: Job queue (streams), job status, and job logs
 - **Prometheus**: Metrics for observability
 - **Docker Compose**: One-command local stack
+
+---
+
+## 🧱 Code Structure
+```
+task-scheduler/
+├── proto/                  # gRPC protobufs
+├── internal/
+│   ├── server/             # gRPC service implementation
+│   ├── worker/             # Redis stream consumer with retry logic
+├── cmd/
+│   ├── main.go             # gRPC server bootstrap
+│   └── worker.go           # Standalone worker launcher
+├── metrics/                # Prometheus metrics registration
+├── docker-compose.yml
+├── prometheus.yml
+└── README.md
+```
+
+---
+
+## 📜 Protobuf Definitions
+Located in `/proto/task.proto`.
+
+- `SubmitJob(JobRequest) returns (JobResponse)`
+- `GetJobStatus(JobStatusRequest) returns (JobStatusResponse)`
+- `GetJobLogs(JobStatusRequest) returns (JobLogsResponse)`
 
 ---
 
@@ -24,7 +51,6 @@ A production-grade, observable, and secure gRPC-based job queue system with Redi
 ---
 
 ## 🗺️ Architecture Diagram
-
 ```
 +-------------------+         +-------------------+         +-------------------+
 |    gRPC Client    | <-----> |      App/API      | <-----> |      Redis        |
@@ -92,24 +118,16 @@ docker-compose up --build
 
 ---
 
+## 🔁 Retry Strategy
+- Jobs are retried up to 3 times on failure
+- Exponential backoff strategy (`2^retryCount` seconds)
+- Final failures are tracked with `status=failed` in Redis
+
+---
+
 ## 📦 Features
 - Job queueing, retries, and status tracking
 - Per-job logs stored in Redis
 - Prometheus metrics for processed/failed jobs and latency
 - Token-based authentication
 - One-command local stack with Docker Compose
-
----
-
-## 🏆 Stretch Goals
-- Dead-letter queue for failed jobs
-- Job priority levels
-- Kubernetes deployment
-- Web frontend for job submission/tracking
-
----
-
-## 📣 Show it off!
-- Publish this repo to GitHub
-- Share your architecture diagram and Prometheus dashboard on LinkedIn or a blog
-- This is FAANG-level backend engineering—congrats!
