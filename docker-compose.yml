@@ -4,12 +4,13 @@ services:
     container_name: task-scheduler-app
     ports:
       - "50053:50053"
-      - "2113:2113"         # Expose metrics port
+      - "2113:2113"
     depends_on:
       - redis
     environment:
       - REDIS_ADDR=redis:6379
       - METRICS_PORT=2113
+      - AUTH_TOKEN=my-secret-token
     restart: unless-stopped
 
   redis:

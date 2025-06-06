@@ -3,12 +3,14 @@ package server
 import (
 	"context"
 	"log"
+	"os"
 
 	"task/internal/metrics"
 	pb "task/proto"
 
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -49,6 +51,15 @@ func (s *TaskServer) GetJobLogs(ctx context.Context, req *pb.JobStatusRequest) (
 }
 
 func (s *TaskServer) SubmitJob(ctx context.Context, req *pb.JobRequest) (*pb.JobResponse, error) {
+	// Token-based authentication
+	expected := os.Getenv("AUTH_TOKEN")
+	if expected == "" {
+		expected = "my-secret-token"
+	}
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok || len(md["authorization"]) == 0 || md["authorization"][0] != expected {
+		return nil, status.Error(codes.Unauthenticated, "Invalid token")
+	}
 	metrics.JobsProcessedByType.WithLabelValues("SubmitJob").Inc()
 	if req.JobId == "" || req.Payload == "" {
 		metrics.JobsFailedByType.WithLabelValues("SubmitJob").Inc()
