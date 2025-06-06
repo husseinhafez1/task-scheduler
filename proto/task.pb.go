@@ -205,6 +205,50 @@ func (x *JobStatusResponse) GetStatus() string {
 	return ""
 }
 
+type JobLogsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Logs          []string               `protobuf:"bytes,1,rep,name=logs,proto3" json:"logs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JobLogsResponse) Reset() {
+	*x = JobLogsResponse{}
+	mi := &file_proto_task_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobLogsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobLogsResponse) ProtoMessage() {}
+
+func (x *JobLogsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_task_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobLogsResponse.ProtoReflect.Descriptor instead.
+func (*JobLogsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_task_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *JobLogsResponse) GetLogs() []string {
+	if x != nil {
+		return x.Logs
+	}
+	return nil
+}
+
 var File_proto_task_proto protoreflect.FileDescriptor
 
 const file_proto_task_proto_rawDesc = "" +
@@ -219,10 +263,14 @@ const file_proto_task_proto_rawDesc = "" +
 	"\x10JobStatusRequest\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"+\n" +
 	"\x11JobStatusResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status2\x80\x01\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\"%\n" +
+	"\x0fJobLogsResponse\x12\x12\n" +
+	"\x04logs\x18\x01 \x03(\tR\x04logs2\xbd\x01\n" +
 	"\vTaskService\x120\n" +
 	"\tSubmitJob\x12\x10.task.JobRequest\x1a\x11.task.JobResponse\x12?\n" +
-	"\fGetJobStatus\x12\x16.task.JobStatusRequest\x1a\x17.task.JobStatusResponseB\x11Z\x0ftask/proto;taskb\x06proto3"
+	"\fGetJobStatus\x12\x16.task.JobStatusRequest\x1a\x17.task.JobStatusResponse\x12;\n" +
+	"\n" +
+	"GetJobLogs\x12\x16.task.JobStatusRequest\x1a\x15.task.JobLogsResponseB\x11Z\x0ftask/proto;taskb\x06proto3"
 
 var (
 	file_proto_task_proto_rawDescOnce sync.Once
@@ -236,20 +284,23 @@ func file_proto_task_proto_rawDescGZIP() []byte {
 	return file_proto_task_proto_rawDescData
 }
 
-var file_proto_task_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_task_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_proto_task_proto_goTypes = []any{
 	(*JobRequest)(nil),        // 0: task.JobRequest
 	(*JobResponse)(nil),       // 1: task.JobResponse
 	(*JobStatusRequest)(nil),  // 2: task.JobStatusRequest
 	(*JobStatusResponse)(nil), // 3: task.JobStatusResponse
+	(*JobLogsResponse)(nil),   // 4: task.JobLogsResponse
 }
 var file_proto_task_proto_depIdxs = []int32{
 	0, // 0: task.TaskService.SubmitJob:input_type -> task.JobRequest
 	2, // 1: task.TaskService.GetJobStatus:input_type -> task.JobStatusRequest
-	1, // 2: task.TaskService.SubmitJob:output_type -> task.JobResponse
-	3, // 3: task.TaskService.GetJobStatus:output_type -> task.JobStatusResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	2, // 2: task.TaskService.GetJobLogs:input_type -> task.JobStatusRequest
+	1, // 3: task.TaskService.SubmitJob:output_type -> task.JobResponse
+	3, // 4: task.TaskService.GetJobStatus:output_type -> task.JobStatusResponse
+	4, // 5: task.TaskService.GetJobLogs:output_type -> task.JobLogsResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -266,7 +317,7 @@ func file_proto_task_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_task_proto_rawDesc), len(file_proto_task_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

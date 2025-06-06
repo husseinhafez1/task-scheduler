@@ -7,6 +7,7 @@ option go_package = "task/proto;task";
 service TaskService {
     rpc SubmitJob (JobRequest) returns (JobResponse);
     rpc GetJobStatus (JobStatusRequest) returns (JobStatusResponse);
+    rpc GetJobLogs (JobStatusRequest) returns (JobLogsResponse);
 }
 
 message JobRequest {
@@ -24,4 +25,8 @@ message JobStatusRequest {
 
 message JobStatusResponse {
     string status = 1;
+}
+
+message JobLogsResponse {
+  repeated string logs = 1;
 }

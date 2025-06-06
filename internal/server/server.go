@@ -40,6 +40,14 @@ func (s *TaskServer) GetJobStatus(ctx context.Context, req *pb.JobStatusRequest)
 	return &pb.JobStatusResponse{Status: status}, nil
 }
 
+func (s *TaskServer) GetJobLogs(ctx context.Context, req *pb.JobStatusRequest) (*pb.JobLogsResponse, error) {
+	logs, err := s.Rdb.LRange(ctx, "job:"+req.JobId+":logs", 0, -1).Result()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to fetch logs")
+	}
+	return &pb.JobLogsResponse{Logs: logs}, nil
+}
+
 func (s *TaskServer) SubmitJob(ctx context.Context, req *pb.JobRequest) (*pb.JobResponse, error) {
 	metrics.JobsProcessedByType.WithLabelValues("SubmitJob").Inc()
 	if req.JobId == "" || req.Payload == "" {

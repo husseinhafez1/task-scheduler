@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math"
 	"strconv"
@@ -45,6 +46,10 @@ func StartWorker(rdb *redis.Client) {
 				payload := message.Values["payload"].(string)
 				retryCount, _ := strconv.Atoi(message.Values["retry"].(string))
 
+				// Log: job started
+				rdb.RPush(ctx, "job:"+jobID+":logs", "Started")
+				rdb.RPush(ctx, "job:"+jobID+":logs", fmt.Sprintf("Processing job %s: %s (retry %d)", jobID, payload, retryCount))
+
 				log.Printf("Processing job %s: %s (retry %d)", jobID, payload, retryCount)
 
 				// Start timing the job with label
@@ -72,11 +77,18 @@ func StartWorker(rdb *redis.Client) {
 								"retry":   retryCount + 1,
 							},
 						})
+						// Log: retry
+						rdb.RPush(ctx, "job:"+jobID+":logs", fmt.Sprintf("Retry %d", retryCount+1))
+					} else {
+						// Log: failed
+						rdb.RPush(ctx, "job:"+jobID+":logs", "Failed")
 					}
 				} else {
 					metrics.JobsProcessedTotal.Inc()
 					metrics.JobsProcessedByType.WithLabelValues(jobType).Inc()
 					rdb.XAck(ctx, "jobs", "workers", message.ID)
+					// Log: success
+					rdb.RPush(ctx, "job:"+jobID+":logs", "Success")
 				}
 
 				status := "success"

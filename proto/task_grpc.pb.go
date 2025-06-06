@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	TaskService_SubmitJob_FullMethodName    = "/task.TaskService/SubmitJob"
 	TaskService_GetJobStatus_FullMethodName = "/task.TaskService/GetJobStatus"
+	TaskService_GetJobLogs_FullMethodName   = "/task.TaskService/GetJobLogs"
 )
 
 // TaskServiceClient is the client API for TaskService service.
@@ -29,6 +30,7 @@ const (
 type TaskServiceClient interface {
 	SubmitJob(ctx context.Context, in *JobRequest, opts ...grpc.CallOption) (*JobResponse, error)
 	GetJobStatus(ctx context.Context, in *JobStatusRequest, opts ...grpc.CallOption) (*JobStatusResponse, error)
+	GetJobLogs(ctx context.Context, in *JobStatusRequest, opts ...grpc.CallOption) (*JobLogsResponse, error)
 }
 
 type taskServiceClient struct {
@@ -59,12 +61,23 @@ func (c *taskServiceClient) GetJobStatus(ctx context.Context, in *JobStatusReque
 	return out, nil
 }
 
+func (c *taskServiceClient) GetJobLogs(ctx context.Context, in *JobStatusRequest, opts ...grpc.CallOption) (*JobLogsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JobLogsResponse)
+	err := c.cc.Invoke(ctx, TaskService_GetJobLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TaskServiceServer is the server API for TaskService service.
 // All implementations must embed UnimplementedTaskServiceServer
 // for forward compatibility.
 type TaskServiceServer interface {
 	SubmitJob(context.Context, *JobRequest) (*JobResponse, error)
 	GetJobStatus(context.Context, *JobStatusRequest) (*JobStatusResponse, error)
+	GetJobLogs(context.Context, *JobStatusRequest) (*JobLogsResponse, error)
 	mustEmbedUnimplementedTaskServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedTaskServiceServer) SubmitJob(context.Context, *JobRequest) (*
 }
 func (UnimplementedTaskServiceServer) GetJobStatus(context.Context, *JobStatusRequest) (*JobStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetJobStatus not implemented")
+}
+func (UnimplementedTaskServiceServer) GetJobLogs(context.Context, *JobStatusRequest) (*JobLogsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetJobLogs not implemented")
 }
 func (UnimplementedTaskServiceServer) mustEmbedUnimplementedTaskServiceServer() {}
 func (UnimplementedTaskServiceServer) testEmbeddedByValue()                     {}
@@ -138,6 +154,24 @@ func _TaskService_GetJobStatus_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TaskService_GetJobLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JobStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).GetJobLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_GetJobLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).GetJobLogs(ctx, req.(*JobStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TaskService_ServiceDesc is the grpc.ServiceDesc for TaskService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var TaskService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetJobStatus",
 			Handler:    _TaskService_GetJobStatus_Handler,
+		},
+		{
+			MethodName: "GetJobLogs",
+			Handler:    _TaskService_GetJobLogs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
