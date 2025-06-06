@@ -10,6 +10,7 @@ A production-style, observable gRPC-based job queue with basic token-based acces
 - **gRPC**: API for submitting and tracking jobs
 - **Redis**: Job queue (streams), job status, and job logs
 - **Prometheus**: Metrics for observability
+- **Grafana**: Real-time dashboard for metrics visualization
 - **Docker Compose**: One-command local stack
 
 ---
@@ -17,19 +18,22 @@ A production-style, observable gRPC-based job queue with basic token-based acces
 ## 🧱 Code Structure
 ```
 .
-├── cmd/                    # Application entry points
-│   └── main.go            # Main application entry point
-├── internal/              # Private application code
-│   ├── metrics/          # Prometheus metrics definitions
-│   ├── server/           # gRPC server implementation
-│   └── worker/           # Job processing worker
-├── proto/                # Protocol Buffer definitions
-│   └── task.proto        # Service and message definitions
-├── docker-compose.yml    # Docker services orchestration
-├── Dockerfile           # Application container definition
-├── prometheus.yml       # Prometheus configuration
-├── go.mod              # Go module definition
-└── README.md           # Project documentation
+├── cmd/                          # Application entry points
+│   └── main.go                  # Main application entry point
+├── internal/                    # Private application code
+│   ├── metrics/                # Prometheus metrics definitions
+│   ├── server/                 # gRPC server implementation
+│   └── worker/                 # Job processing worker
+├── proto/                      # Protocol Buffer definitions
+│   └── task.proto              # Service and message definitions
+├── grafana/                    # Grafana provisioning and dashboards
+│   ├── dashboards/             # Prebuilt dashboard JSONs
+│   └── provisioning/           # Datasource and dashboard provisioning configs
+├── docker-compose.yml          # Docker services orchestration
+├── Dockerfile                  # Application container definition
+├── prometheus.yml              # Prometheus configuration
+├── go.mod                      # Go module definition
+└── README.md                   # Project documentation
 ```
 
 ---
@@ -119,8 +123,7 @@ grpcurl -plaintext \
 ## 🐳 Quick Start (Docker Compose)
 ```sh
 docker-compose up --build
-```
-- App: gRPC on `localhost:50053`, metrics on `localhost:2113/metrics`
+```- App: gRPC on `localhost:50053`, metrics on `localhost:2113/metrics`
 - Redis: `localhost:6379`
 - Prometheus: `localhost:9090`
 
@@ -143,6 +146,7 @@ docker-compose up --build
 - Job queueing, retries, and status tracking
 - Per-job logs stored in Redis
 - Prometheus metrics for processed/failed jobs and latency
+- Grafana dashboard for real-time monitoring and observability
 - Token-based authentication
 - One-command local stack with Docker Compose
 
