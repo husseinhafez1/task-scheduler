@@ -16,18 +16,20 @@ A production-style, observable gRPC-based job queue with basic token-based acces
 
 ## 🧱 Code Structure
 ```
-task-scheduler/
-├── proto/                  # gRPC protobufs
-├── internal/
-│   ├── server/             # gRPC service implementation
-│   ├── worker/             # Redis stream consumer with retry logic
-├── cmd/
-│   ├── main.go             # gRPC server bootstrap
-│   └── worker.go           # Standalone worker launcher
-├── metrics/                # Prometheus metrics registration
-├── docker-compose.yml
-├── prometheus.yml
-└── README.md
+.
+├── cmd/                    # Application entry points
+│   └── main.go            # Main application entry point
+├── internal/              # Private application code
+│   ├── metrics/          # Prometheus metrics definitions
+│   ├── server/           # gRPC server implementation
+│   └── worker/           # Job processing worker
+├── proto/                # Protocol Buffer definitions
+│   └── task.proto        # Service and message definitions
+├── docker-compose.yml    # Docker services orchestration
+├── Dockerfile           # Application container definition
+├── prometheus.yml       # Prometheus configuration
+├── go.mod              # Go module definition
+└── README.md           # Project documentation
 ```
 
 ---
